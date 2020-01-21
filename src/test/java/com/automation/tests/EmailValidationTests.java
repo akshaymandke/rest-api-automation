@@ -6,11 +6,15 @@ import com.automation.services.GETEmailValidations;
 
 public class EmailValidationTests {
 
-	
-	@Test(groups= {"emailValidations"})
+	@Test(groups = { "emailValidations" })
 	public void verifyUserIsPresent() {
-		
-		GETEmailValidations getUser=new GETEmailValidations();
+		GETEmailValidations getUser = new GETEmailValidations();
 		getUser.searchUser_SuccessTest();
+	}
+
+	@Test(groups = { "emailValidations" })
+	public void verifyInvalid_Users_Api() {
+		GETEmailValidations invalidApi = new GETEmailValidations();
+		invalidApi.searchUser_NotFoundTest();
 	}
 }
