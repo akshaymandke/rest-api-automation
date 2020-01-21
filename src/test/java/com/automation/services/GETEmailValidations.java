@@ -15,9 +15,9 @@ public class GETEmailValidations {
 	 */
 	public void searchUser_SuccessTest() {
 		try {
-			 when().get(ServiceHelper.getUrlValue() + "users?username=Samantha")
+			 when().get(ServiceHelper.getUrlValue("userUrl") + "?username="+ServiceHelper.getUser("socialUser"))
 			.then().statusCode(200).assertThat()
-			.body("username", Matchers.hasItem("Samantha"));
+			.body("username", Matchers.hasItem(ServiceHelper.getUser("socialUser")));
 		} catch (Exception e) {
 			 e.printStackTrace();
 		}
