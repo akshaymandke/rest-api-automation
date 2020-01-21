@@ -1,6 +1,8 @@
 package com.automation.utilities;
 
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ServiceHelper {
 	
@@ -43,5 +45,18 @@ public class ServiceHelper {
 			e.printStackTrace();
 		}
 		return returnValue;
+	}
+	
+	/**
+	 * validateEmail 
+	 * This method is used to validate Emails
+	 * 
+	 * @return {@true/false boolean}
+	 */
+	public static boolean validateEmail(String email) {
+		String emailRegex = "^[\\w-\\+]+(\\.[\\w]+)*@[\\w-]+(\\.[\\w]+)*(\\.[a-z]{2,})$";
+		Pattern pattern = Pattern.compile(emailRegex, Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(email);
+		return matcher.matches();
 	}
 }
