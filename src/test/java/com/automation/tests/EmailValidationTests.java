@@ -1,5 +1,6 @@
 package com.automation.tests;
 
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 
 import com.automation.services.GETEmailValidations;
@@ -22,5 +23,10 @@ public class EmailValidationTests {
 	public void verifyEmails() {
 		GETEmailValidations validateEmail=new GETEmailValidations();
 		validateEmail.validateEmailsOfUser();
+	}
+	
+	@AfterTest
+	public void runCompletion() {
+		System.out.println("Test Execution Completed");
 	}
 }

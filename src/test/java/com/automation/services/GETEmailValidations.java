@@ -64,7 +64,10 @@ public class GETEmailValidations {
 			
 			// call search user service and get the userId if present
 			searchUser_SuccessTest();
-			List<Integer> postIds = when().get(ServiceHelper.getUrlValue("postUrl") + "?userId=" + userId.get(0)).then()
+			
+			
+			for(int u=0;u<userId.size();u++) {
+			List<Integer> postIds = when().get(ServiceHelper.getUrlValue("postUrl") + "?userId=" + userId.get(u)).then()
 					.statusCode(200).extract().jsonPath().getList("id");
 			if(postIds != null) {
 
@@ -100,13 +103,14 @@ public class GETEmailValidations {
 							}
 						}
 					}
-			   }
+			   } //to get the list of invalid emails
 				if(!listOfInvalidEmails.isEmpty()) {
 					Reporter.log(listOfInvalidEmails.toString(), true);
 				}
 			} else {
 				throw new SkipException("No posts found for the specified user");
 			}
+		  }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
