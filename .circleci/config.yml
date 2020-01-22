@@ -1,0 +1,14 @@
+# Java Maven CircleCI 2.0 configuration file
+
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:8-jdk
+
+	steps:
+      - checkout
+      
+      # run tests!
+      - run: mvn install
+      - run: mvn test
