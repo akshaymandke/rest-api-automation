@@ -14,28 +14,29 @@ import com.automation.utilities.ServiceHelper;
 
 public class GETEmailValidations {
 
-	public static List<Integer> userId;
+	public static List<Integer> userIds;
 
 	/**
-	 * searchUser()
+	 * searchUser_SuccessTest()
 	 * 
-	 * This method will search for the specified user and verifies the username if
-	 * to get userId present
+	 * This method will search for the specified user and verifies the username 
+	 * if present to get userId 
 	 * 
 	 */
 	public void searchUser_SuccessTest() {
 		try {
-			userId = when()
+			userIds = when()
 					.get(ServiceHelper.getUrlValue("userUrl") + "?username=" + ServiceHelper.getUser("socialUser"))
 					.then().statusCode(200).assertThat()
-					.body("username", Matchers.hasItem(ServiceHelper.getUser("socialUser")))
-					.extract().jsonPath()
+					.body("username", Matchers.hasItem(ServiceHelper.getUser("socialUser"))).extract().jsonPath()
 					.getList("id");
+			if(userIds==null) {
+				throw new SkipException("No user found with the name " +ServiceHelper.getUser("socialUser"));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
 
 	/**
 	 * searchUser_NotFoundTest()
@@ -45,14 +46,13 @@ public class GETEmailValidations {
 	 */
 	public void searchUser_NotFoundTest() {
 		try {
-			when().get(ServiceHelper.getUrlValue("userUrl") + "/username="+ServiceHelper.getUser("socialUser"))
-			.then().statusCode(404).assertThat()
-			.body("username", is(nullValue()));
+			when().get(ServiceHelper.getUrlValue("userUrl") + "/username=" + ServiceHelper.getUser("socialUser"))
+			.then().statusCode(404).assertThat().body("username", is(nullValue()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * validateEmailsOfUser()
 	 * 
@@ -62,55 +62,46 @@ public class GETEmailValidations {
 		try {
 			List<String> listOfInvalidEmails = new ArrayList<String>();
 			
-			// call search user service and get the userId if present
-			searchUser_SuccessTest();
-			
-			
-			for(int u=0;u<userId.size();u++) {
-			List<Integer> postIds = when().get(ServiceHelper.getUrlValue("postUrl") + "?userId=" + userId.get(u)).then()
-					.statusCode(200).extract().jsonPath().getList("id");
-			if(postIds != null) {
+			for (int u = 0; u < userIds.size(); u++) {
+				List<Integer> postIds = 
+						 when()
+						.get(ServiceHelper.getUrlValue("postUrl") + "?userId=" + userIds.get(u))
+						.then().statusCode(200).extract().jsonPath().getList("id");
+				if (postIds != null) {
 
-				// loop through the posts
-				for (int i = 0; i < postIds.size(); i++) {
+					// loop through the posts
+					for (int i = 0; i < postIds.size(); i++) {
 
-					// get comment id's based on post Id's
-					List<Integer> commentIds = when()
-							.get(ServiceHelper.getUrlValue("commentUrl") + "?postId=" + postIds.get(i))
-							.then()
-							.statusCode(200)
-							.extract().jsonPath()
-							.getList("id");
-					
-					//check if list of comment Id is null
-					if (commentIds != null) {
-						for (int j = 0; j < commentIds.size(); j++) {
+						// get comment id's based on post Id's
+						List<Integer> commentIds = when()
+								.get(ServiceHelper.getUrlValue("commentUrl") + "?postId=" + postIds.get(i))
+								.then().statusCode(200).extract().jsonPath().getList("id");
 
-							System.out.println(
-									
-									" Post Id: "+postIds.get(i)+" Comment  Id: "+commentIds.get(j));
-							
-							String email = 
-									 when()
-									.get(ServiceHelper.getUrlValue("commentUrl") + "?id=" + commentIds.get(j))
-									.then()
-									.statusCode(200).extract().jsonPath()
-									.get("[0].email").toString();
+						// check if list of comment Id is null and loop through the list of comments to validate email's
+						if (commentIds != null) {
+							for (int j = 0; j < commentIds.size(); j++) {
+								System.out
+										.println(" Post Id: " + postIds.get(i) + " Comment  Id: " + commentIds.get(j));
+								String email = 
+										 when()
+										.get(ServiceHelper.getUrlValue("commentUrl") + "?id=" + commentIds.get(j))
+										.then().statusCode(200)
+										.extract().jsonPath().get("[0].email").toString();
 
-							// check if the email on the comments is valid
-							if (ServiceHelper.validateEmail(email) == false) {
-								listOfInvalidEmails.add(email);
+								// check if the email on the comments is valid
+								if (ServiceHelper.validateEmail(email) == false) {
+									listOfInvalidEmails.add(email);
+								}
 							}
 						}
+					} // to get the list of invalid emails
+					if (!listOfInvalidEmails.isEmpty()) {
+						Reporter.log(listOfInvalidEmails.toString(), true);
 					}
-			   } //to get the list of invalid emails
-				if(!listOfInvalidEmails.isEmpty()) {
-					Reporter.log(listOfInvalidEmails.toString(), true);
-				}
-			} else {
-				throw new SkipException("No posts found for the specified user");
+				} else {
+					throw new SkipException("No user found with the name " +ServiceHelper.getUser("socialUser"));
+			  }
 			}
-		  }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

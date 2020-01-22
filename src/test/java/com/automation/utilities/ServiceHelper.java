@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 
 public class ServiceHelper {
 	
-
 	/**
 	 * getUrlValue() 
 	 * This method is used to fetch the api url value based
@@ -18,7 +17,6 @@ public class ServiceHelper {
 		String returnValue = null;
 		try {
 			Properties property = new Properties();
-
 			property.load(ServiceHelper.class.getClassLoader().getResourceAsStream("apiUrl.properties"));
 			returnValue = property.getProperty(key);
 		} catch (Exception e) {
@@ -38,7 +36,6 @@ public class ServiceHelper {
 		String returnValue = null;
 		try {
 			Properties property = new Properties();
-
 			property.load(ServiceHelper.class.getClassLoader().getResourceAsStream("users.properties"));
 			returnValue = property.getProperty(key);
 		} catch (Exception e) {
@@ -48,15 +45,21 @@ public class ServiceHelper {
 	}
 	
 	/**
-	 * validateEmail 
+	 * validateEmail()
 	 * This method is used to validate Emails
-	 * 
+	 * @param email
 	 * @return {@true/false boolean}
 	 */
 	public static boolean validateEmail(String email) {
+		Matcher matcher=null;
+		try {
 		String emailRegex = "^[\\w-\\+]+(\\.[\\w]+)*@[\\w-]+(\\.[\\w]+)*(\\.[a-z]{2,})$";
 		Pattern pattern = Pattern.compile(emailRegex, Pattern.CASE_INSENSITIVE);
-		Matcher matcher = pattern.matcher(email);
+		matcher = pattern.matcher(email);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		return matcher.matches();
-	}
+	   }
 }
+
