@@ -3,10 +3,10 @@ package com.automation.services;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.is;
-
 import java.util.ArrayList;
 import java.util.List;
 import org.hamcrest.Matchers;
+import org.testng.Assert;
 import org.testng.Reporter;
 import org.testng.SkipException;
 
@@ -14,7 +14,7 @@ import com.automation.utilities.ServiceHelper;
 
 public class GETEmailValidations {
 
-	public static List<Integer> userIds;
+	public List<Integer> userIds;
 
 	/**
 	 * searchUser_SuccessTest()
@@ -31,7 +31,7 @@ public class GETEmailValidations {
 					.body("username", Matchers.hasItem(ServiceHelper.getUser("socialUser"))).extract().jsonPath()
 					.getList("id");
 			if(userIds==null) {
-				throw new SkipException("No user found with the name " +ServiceHelper.getUser("socialUser"));
+				Assert.fail("No user found with the name" + ServiceHelper.getUser("socialUser"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -53,16 +53,49 @@ public class GETEmailValidations {
 		}
 	}
 
+	
+	/**
+	 * emptyQueryParameter()
+	 * 
+	 * This method will verify if passing wrong username as query parameter returns empty payload
+	 * 
+	 */
+	public void emptyQueryParameter() {
+		try {
+			when().get(ServiceHelper.getUrlValue("userUrl") + "?username="+null)
+			.then().statusCode(200).assertThat()
+			.body("isEmpty()", Matchers.is(true));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * emptyQueryParameter()
+	 * 
+	 * This method will verify if passing wrong username as query parameter returns empty payload
+	 * 
+	 */
+	public void wrongUsername() {
+		try {
+			when().get(ServiceHelper.getUrlValue("userUrl") + "?username="+ServiceHelper.getUser("invalidUser"))
+			.then().statusCode(200).assertThat()
+			.body("isEmpty()", Matchers.is(true));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * validateEmailsOfUser()
 	 * 
 	 * This method will perform email validations
 	 */
 	public void validateEmailsOfUser() {
-		try {
-			List<String> listOfInvalidEmails = new ArrayList<String>();
-			
+		try {			
+			List<String> listOfInvalidEmails = new ArrayList<String>();			
 			for (int u = 0; u < userIds.size(); u++) {
+				//get posts based on userId
 				List<Integer> postIds = 
 						 when()
 						.get(ServiceHelper.getUrlValue("postUrl") + "?userId=" + userIds.get(u))
@@ -81,7 +114,7 @@ public class GETEmailValidations {
 						if (commentIds != null) {
 							for (int j = 0; j < commentIds.size(); j++) {
 								System.out
-										.println(" Post Id: " + postIds.get(i) + " Comment  Id: " + commentIds.get(j));
+										.println(" Post Id: " + postIds.get(i) + " Comment  Id: " + commentIds.get(j));								
 								String email = 
 										 when()
 										.get(ServiceHelper.getUrlValue("commentUrl") + "?id=" + commentIds.get(j))
@@ -94,7 +127,8 @@ public class GETEmailValidations {
 								}
 							}
 						}
-					} // to get the list of invalid emails
+					} 
+					// to get the list of invalid emails
 					if (!listOfInvalidEmails.isEmpty()) {
 						Reporter.log(listOfInvalidEmails.toString(), true);
 					}
